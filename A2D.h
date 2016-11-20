@@ -1,6 +1,8 @@
 #ifndef A2D_H_
 #define A2D_H_
 
+#define ADC_PRECISION 10
+
 //initializes the ADC Pins for use
 void A2D_init() {
     // ADEN: Enables analog-to-digital conversion
