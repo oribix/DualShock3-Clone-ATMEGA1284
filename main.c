@@ -28,6 +28,7 @@
 
 enum ControllerState {controller_INIT, controller_WAIT} controllerState;
 signed char xTilt, yTilt, zTilt;
+unsigned char rightH, rightV, leftH, leftV;
 unsigned long long controllerVector;
 
 void controllerInit(){
@@ -45,15 +46,21 @@ void controllerTick(){
         break;
         
         case controller_WAIT:
-        //get controller vector values
+        //get accellerometer values
         xTilt = accReadAddress(LIS3DH_REG_OUT_X_H);
         yTilt = accReadAddress(LIS3DH_REG_OUT_Y_H);
         zTilt = accReadAddress(LIS3DH_REG_OUT_Z_H);
         
+        //get thumb stick values
+        Set_A2D_Pin(0); rightH = ADC >> 2;
+        Set_A2D_Pin(1); rightV = ADC >> 2;
+        Set_A2D_Pin(2); leftH  = ADC >> 2;
+        Set_A2D_Pin(3); leftV  = ADC >> 2;
+        
         //wait for USART to be ready
         while(!USART_IsSendReady(0));
         //send data
-        USART_Send(zTilt, 0);
+        USART_Send(rightV, 0);
         //wait for transmission to complete
         while(!USART_HasTransmitted(0)){}
         //flush USART
@@ -100,8 +107,7 @@ int main(void)
     initUSART(0);
     accBegin();
     
-    //A2D_init();
-    //Set_A2D_Pin(0);
+    A2D_init();
     
     USART_Flush(0);
     
