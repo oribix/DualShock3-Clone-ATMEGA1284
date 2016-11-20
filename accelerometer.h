@@ -99,6 +99,7 @@ void accTransmitAddress(unsigned char addr, unsigned char rw){
     }
 }
 
+//NOT TESTED
 //addr: address you want to read from
 //data: array of data to write
 //n:    number of addresses to write to. Addresses are written sequentially
@@ -122,6 +123,7 @@ void accWrite(unsigned char addr, unsigned char data[], unsigned char n){
     accEndTransaction();
 }
 
+//NOT TESTED
 void accWriteAddress(unsigned char addr, unsigned char data){
     unsigned char d[1];
     d[0] = data;
