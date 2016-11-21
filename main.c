@@ -54,6 +54,55 @@ unsigned char invertThumbStick(unsigned char ts){
     return maxValTS - ts;
 }
 
+//returns an unsigned short containing the status of each button
+unsigned short getButtonVector(){
+    unsigned char up, down, left, right, A, B, X, Y, L1, L2, R1, R2, sl, st;
+    
+    //d-pad
+    right   = GetBit(PIND, 4);
+    up      = GetBit(PIND, 5);
+    left    = GetBit(PIND, 6);
+    down    = GetBit(PIND, 7);
+    
+    //shoulder buttons
+    L1 = GetBit(PINB, 7);
+    L2 = GetBit(PIND, 2);
+    R1 = GetBit(PINB, 5);
+    R2 = GetBit(PINB, 4);
+    
+    //select start
+    sl = GetBit(PIND, 3);
+    st = GetBit(PINB, 3);
+    
+    //ABXY ... DualShock 3 does not have ABXY but I cant name it ^OX[]
+    A = GetBit(PINB, 0);  //O
+    B = GetBit(PINA, 4);  //X
+    X = GetBit(PINB, 1);  //^
+    Y = GetBit(PINB, 2);  //[]
+    
+    //construct button vector
+    unsigned short bv = 0;
+    bv = (bv | B)     << 1;
+    bv = (bv | Y)     << 1;
+    bv = (bv | sl)    << 1;
+    bv = (bv | st)    << 1;
+    
+    bv = (bv | up)    << 1;
+    bv = (bv | down)  << 1;
+    bv = (bv | left)  << 1;
+    bv = (bv | right) << 1;
+    
+    bv = (bv | A)     << 1;
+    bv = (bv | X)     << 1;
+    bv = (bv | L1)    << 1;
+    bv = (bv | R1)    << 1;
+    
+    bv = (bv | L2)    << 1;
+    bv = (bv | R2)    << 2;
+    
+    return ~bv;
+}
+
 enum ControllerState {controller_INIT, controller_WAIT} controllerState;
 signed char xTilt, yTilt, zTilt;                //accelerometer values
 unsigned char rightH, rightV, leftH, leftV;     //thumb stick values
@@ -96,6 +145,9 @@ void controllerTick(){
         rightH = invertThumbStick(rightH);
         leftH  = invertThumbStick(leftH);
         
+        //get buttons
+        buttons = getButtonVector();
+        
         //construct controller vector
         controllerVector = shiftIn(controllerVector, xTilt, TILT_PRECISION);
         controllerVector = shiftIn(controllerVector, yTilt, TILT_PRECISION);
@@ -104,13 +156,17 @@ void controllerTick(){
         controllerVector = shiftIn(controllerVector, leftH,  TS_PRECISION);
         controllerVector = shiftIn(controllerVector, rightV, TS_PRECISION);
         controllerVector = shiftIn(controllerVector, rightH, TS_PRECISION);
+        controllerVector <<= 16;
+        controllerVector |= buttons;
+        
+        //value to send. This is used for testing purposes
+        unsigned char var = buttons >> 8;
         
         //send values
         while(!USART_IsSendReady(0));
-        USART_Send(leftH, 0);
+        USART_Send(var, 0);
         while(!USART_HasTransmitted(0));
         USART_Flush(0);
-
         break;
     }
 
@@ -147,14 +203,16 @@ void startController(unsigned portBASE_TYPE Priority)
 
 int main(void)
 {
-    DDRA = 0x00; PORTA = 0xFF;
+    
+    DDRB = 0x00; PORTB = 0xFF;
     DDRC = 0xFF; PORTC = 0x00;
+    DDRD = 0x00; PORTD = 0xFF;
     
     initUSART(0);
     accBegin();
     
     A2D_init();
-    
+    DDRA = DDRA & 0x0F; PORTA |= 0xF0;
     USART_Flush(0);
     
     //Start Tasks

@@ -22,7 +22,7 @@ unsigned char SetBit(unsigned char pin, unsigned char number, unsigned char bin_
 //Returns: The value of the PINx
 unsigned char GetBit(unsigned char port, unsigned char number) 
 {
-	return ( port & (0x01 << number) );
+	return ( port & (0x01 << number) ) ? 1 : 0;
 }
 
 #endif //BIT_H
