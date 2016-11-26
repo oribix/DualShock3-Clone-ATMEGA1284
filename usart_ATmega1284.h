@@ -90,7 +90,7 @@ void USART_Flush(unsigned char usartNum)
 void USART_Send(unsigned char sendMe, unsigned char usartNum)
 {
 	if (usartNum != 1) {
-		while( !(UCSR0A & (1 << UDRE0)) );
+		while( !(UCSR0A & (1 << UDRE0)) ); //wait for data register to empty
 		UDR0 = sendMe;
 	}
 	else {

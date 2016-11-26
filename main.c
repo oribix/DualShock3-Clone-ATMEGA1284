@@ -159,14 +159,18 @@ void controllerTick(){
         controllerVector <<= 16;
         controllerVector |= buttons;
         
-        //value to send. This is used for testing purposes
-        unsigned char var = buttons >> 8;
-        
-        //send values
+        //wait for USART to be ready to send
         while(!USART_IsSendReady(0));
-        USART_Send(var, 0);
+        
+        //long long is 8 bytes... send 8 bytes
+        unsigned char i = 2;
+        while(i-->0){
+            unsigned char var = (controllerVector >> (i * 8)) & 0xFF;
+            USART_Send(var, 0);
+        }
         while(!USART_HasTransmitted(0));
-        USART_Flush(0);
+        //flush USART
+        //USART_Flush(0);
         break;
     }
 
