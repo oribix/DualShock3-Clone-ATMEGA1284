@@ -159,18 +159,19 @@ void controllerTick(){
         controllerVector <<= 16;
         controllerVector |= buttons;
         
-        //wait for USART to be ready to send
-        while(!USART_IsSendReady(0));
+        //get rumble duration
+        //also helps to synchronize usart
+        static unsigned char duration;
+        duration = USART_Receive(0);
         
         //long long is 8 bytes... send 8 bytes
-        unsigned char i = 2;
+        unsigned char i = 8;
         while(i-->0){
             unsigned char var = (controllerVector >> (i * 8)) & 0xFF;
             USART_Send(var, 0);
         }
         while(!USART_HasTransmitted(0));
-        //flush USART
-        //USART_Flush(0);
+        
         break;
     }
 
