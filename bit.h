@@ -7,6 +7,12 @@
 #ifndef BIT_H
 #define BIT_H
 
+#define low  0
+#define high 1
+
+#define INPUT_PIN 0
+#define OUTPUT_PIN 1
+
 ////////////////////////////////////////////////////////////////////////////////
 //Functionality - Sets bit on a PORTx
 //Parameter: Takes in a uChar for a PORTx, the pin number and the binary value 
@@ -23,6 +29,22 @@ unsigned char SetBit(unsigned char pin, unsigned char number, unsigned char bin_
 unsigned char GetBit(unsigned char port, unsigned char number) 
 {
 	return ( port & (0x01 << number) ) ? 1 : 0;
+}
+
+//pulses the given pin low then high.
+//notice that port is a pointer
+//make sure to pass in &PORTx, not PORTx
+void pulse01(volatile uint8_t *port, unsigned char number){
+    *port = SetBit(*port, number, 0);
+    *port = SetBit(*port, number, 1);
+}
+
+//pulses the given pin high then low.
+//notice that port is a pointer
+//make sure to pass in &PORTx, not PORTx
+void pulse10(volatile uint8_t *port, unsigned char number){
+    *port = SetBit(*port, number, 1);
+    *port = SetBit(*port, number, 0);
 }
 
 #endif //BIT_H
