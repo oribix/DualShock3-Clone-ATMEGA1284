@@ -163,8 +163,9 @@ void controllerTick(){
             //also helps to synchronize USART
             duration = USART_Receive(0);
             
-            //long long is 8 bytes... send 8 bytes
+            //controller vector is 8 bytes...
             unsigned long long cv = getControllerVector();
+            //...so we send 8 bytes (MSByte to LSByte)
             unsigned char i = 8;
             while(i-->0){
                 unsigned char var = (cv >> (i * 8)) & 0xFF;
