@@ -145,6 +145,10 @@ int main(void)
     DDRC = 0xFF; PORTC = 0x00;
     DDRD = 0x00; PORTD = 0xFF;
     
+    //init vibration motor
+    DDRB = SetBit(DDRB, 6, high);
+    PORTB = SetBit(PORTB, 6, low);
+    
     initUSART(0);
     accBegin();
     
@@ -158,8 +162,8 @@ int main(void)
             //get rumble
             //also helps to synchronize USART
             unsigned char rumble = USART_Receive(0);
-            if(rumble) PORTC = SetBit(PORTC, 0, high);
-            else PORTC = SetBit(PORTC, PORTC0, low);
+            if(rumble) PORTB = SetBit(PORTB, 6, high);
+            else PORTB = SetBit(PORTB, 6, low);
             
             //controller vector is 8 bytes...
             unsigned long long cv = getControllerVector();
