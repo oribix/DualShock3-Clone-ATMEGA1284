@@ -103,11 +103,48 @@ unsigned short getButtonVector(){
     return ~bv;
 }
 
+//returns the full 64-bit controller vector
+unsigned long long getControllerVector(){
+    signed char xTilt, yTilt, zTilt;                //accelerometer values
+    unsigned char rightH, rightV, leftH, leftV;     //thumb stick values
+    unsigned short buttons;                         //button vector
+    unsigned long long controllerVector = 0;        //64bit data vector
+    
+    //get accelerometer values
+    xTilt = accReadAddress(LIS3DH_REG_OUT_X_H);
+    yTilt = accReadAddress(LIS3DH_REG_OUT_Y_H);
+    zTilt = accReadAddress(LIS3DH_REG_OUT_Z_H);
+    
+    //get thumb stick values
+    rightH = getThumbStickVal(RIGHTH);
+    rightV = getThumbStickVal(RIGHTV);
+    leftH  = getThumbStickVal(LEFTH);
+    leftV  = getThumbStickVal(LEFTV);
+    
+    //invert horizontal axis
+    //I do this because of the way the sticks are wired on the breadboard
+    rightH = invertThumbStick(rightH);
+    leftH  = invertThumbStick(leftH);
+    
+    //get buttons
+    buttons = getButtonVector();
+    
+    //construct controller vector
+    controllerVector = shiftIn(controllerVector, xTilt, TILT_PRECISION);
+    controllerVector = shiftIn(controllerVector, yTilt, TILT_PRECISION);
+    controllerVector = shiftIn(controllerVector, zTilt, TILT_PRECISION);
+    controllerVector = shiftIn(controllerVector, leftV,  TS_PRECISION);
+    controllerVector = shiftIn(controllerVector, leftH,  TS_PRECISION);
+    controllerVector = shiftIn(controllerVector, rightV, TS_PRECISION);
+    controllerVector = shiftIn(controllerVector, rightH, TS_PRECISION);
+    controllerVector <<= 16;
+    controllerVector |= buttons;
+
+    return controllerVector;
+}
+
 enum ControllerState {controller_INIT, controller_WAIT} controllerState;
-signed char xTilt, yTilt, zTilt;                //accelerometer values
-unsigned char rightH, rightV, leftH, leftV;     //thumb stick values
-unsigned short buttons;                         //button vector
-unsigned long long controllerVector;            //64bit data vector holding all the measured values
+static unsigned char duration;
 
 void controllerInit(){
     controllerState = controller_INIT;
@@ -117,60 +154,24 @@ void controllerTick(){
     //Actions
     switch(controllerState){
         case controller_INIT:
-            xTilt = 0;
-            yTilt = 0;
-            zTilt = 0;
-            rightH = 0;
-            rightV = 0;
-            leftH = 0;
-            leftV = 0;
-            buttons = 0;
-            controllerVector = 0;
         break;
         
         case controller_WAIT:
-        //get accelerometer values
-        xTilt = accReadAddress(LIS3DH_REG_OUT_X_H);
-        yTilt = accReadAddress(LIS3DH_REG_OUT_Y_H);
-        zTilt = accReadAddress(LIS3DH_REG_OUT_Z_H);
         
-        //get thumb stick values
-        rightH = getThumbStickVal(RIGHTH);
-        rightV = getThumbStickVal(RIGHTV);
-        leftH  = getThumbStickVal(LEFTH);
-        leftV  = getThumbStickVal(LEFTV);
-        
-        //invert horizontal axis
-        //I do this because of the way the sticks are wired on the breadboard
-        rightH = invertThumbStick(rightH);
-        leftH  = invertThumbStick(leftH);
-        
-        //get buttons
-        buttons = getButtonVector();
-        
-        //construct controller vector
-        controllerVector = shiftIn(controllerVector, xTilt, TILT_PRECISION);
-        controllerVector = shiftIn(controllerVector, yTilt, TILT_PRECISION);
-        controllerVector = shiftIn(controllerVector, zTilt, TILT_PRECISION);
-        controllerVector = shiftIn(controllerVector, leftV,  TS_PRECISION);
-        controllerVector = shiftIn(controllerVector, leftH,  TS_PRECISION);
-        controllerVector = shiftIn(controllerVector, rightV, TS_PRECISION);
-        controllerVector = shiftIn(controllerVector, rightH, TS_PRECISION);
-        controllerVector <<= 16;
-        controllerVector |= buttons;
-        
-        //get rumble duration
-        //also helps to synchronize usart
-        static unsigned char duration;
-        duration = USART_Receive(0);
-        
-        //long long is 8 bytes... send 8 bytes
-        unsigned char i = 8;
-        while(i-->0){
-            unsigned char var = (controllerVector >> (i * 8)) & 0xFF;
-            USART_Send(var, 0);
+        if(USART_HasReceived(0)){
+            //get rumble duration
+            //also helps to synchronize USART
+            duration = USART_Receive(0);
+            
+            //long long is 8 bytes... send 8 bytes
+            unsigned long long cv = getControllerVector();
+            unsigned char i = 8;
+            while(i-->0){
+                unsigned char var = (cv >> (i * 8)) & 0xFF;
+                USART_Send(var, 0);
+            }
+            while(!USART_HasTransmitted(0));
         }
-        while(!USART_HasTransmitted(0));
         
         break;
     }
