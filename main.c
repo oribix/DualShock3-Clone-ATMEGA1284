@@ -9,20 +9,15 @@
 #include <avr/eeprom.h> 
 #include <avr/portpins.h> 
 #include <avr/pgmspace.h> 
- 
-//FreeRTOS include files 
-#include "FreeRTOS.h" 
-#include "task.h" 
-#include "croutine.h"
 
 //binary manipulation helpers
 #include "bit.h"
+
 //drivers
 #include "A2D.h"
 #include "accelerometer.h"
 #include "usart_ATmega1284.h"
 
-#define TICKRATE 20         //ticks per second
 #define TS_PRECISION  6     //thumb stick bit precision
 #define TILT_PRECISION 8    //accelerometer tilt precision
 
@@ -143,71 +138,6 @@ unsigned long long getControllerVector(){
     return controllerVector;
 }
 
-enum ControllerState {controller_INIT, controller_WAIT} controllerState;
-static unsigned char duration;
-
-void controllerInit(){
-    controllerState = controller_INIT;
-}
-
-void controllerTick(){
-    //Actions
-    switch(controllerState){
-        case controller_INIT:
-        break;
-        
-        case controller_WAIT:
-        
-        if(USART_HasReceived(0)){
-            //get rumble duration
-            //also helps to synchronize USART
-            duration = USART_Receive(0);
-            
-            //controller vector is 8 bytes...
-            unsigned long long cv = getControllerVector();
-            //...so we send 8 bytes (MSByte to LSByte)
-            unsigned char i = 8;
-            while(i-->0){
-                unsigned char var = (cv >> (i * 8)) & 0xFF;
-                USART_Send(var, 0);
-            }
-            while(!USART_HasTransmitted(0));
-        }
-        
-        break;
-    }
-
-    //Transitions
-    switch(controllerState){
-        case controller_INIT:
-        controllerState = controller_WAIT;
-        break;
-        
-        case controller_WAIT:
-        break;
-        
-        default:
-        controllerState = controller_INIT;
-        break;
-    }
-}
-
-void controllerTask()
-{
-    controllerInit();
-    for(;;)
-    {
-        controllerTick();
-        int tickRate = 1000 / TICKRATE;
-        vTaskDelay(tickRate);
-    }
-}
-
-void startController(unsigned portBASE_TYPE Priority)
-{
-    xTaskCreate(controllerTask, (signed portCHAR *)"controllerTask", configMINIMAL_STACK_SIZE, NULL, Priority, NULL );
-}
-
 int main(void)
 {
     
@@ -220,14 +150,27 @@ int main(void)
     
     A2D_init();
     DDRA = DDRA & 0x0F; PORTA |= 0xF0;
-    USART_Flush(0);
+
     
-    //Start Tasks
-    startController(1);
-    //RunSchedular
-    vTaskStartScheduler();
-    
-    
-    
+    while(1){
+        //if a request for the ds3 controller vector is made...
+        if(USART_HasReceived(0)){
+            //get rumble
+            //also helps to synchronize USART
+            unsigned char rumble = USART_Receive(0);
+            if(rumble) PORTC = SetBit(PORTC, 0, high);
+            else PORTC = SetBit(PORTC, PORTC0, low);
+            
+            //controller vector is 8 bytes...
+            unsigned long long cv = getControllerVector();
+            //...so we send 8 bytes (MSByte to LSByte)
+            unsigned char i = 8;
+            while(i-->0){
+                unsigned char var = (cv >> (i * 8)) & 0xFF;
+                USART_Send(var, 0);
+            }
+            while(!USART_HasTransmitted(0));
+        }
+    }
     return 0;
 }
