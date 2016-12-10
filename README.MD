@@ -1,13 +1,17 @@
 #DUALSHOCK3 Clone
 This is a controller inspired by the Sony's DualShock 3.
 It has Twin Thumb Sticks, an accelerometer, buttons, and is wireless.
-This project uses a bluetooth module for wireless conectivity.
+This project uses a bluetooth module for wireless connectivity.
+
+[Here is a video demonstration]().
 
 ##Hardware
 
 The accelerometer used is the AdaFruit LIS3DH.
 I used HC-05 bluetooth modules for connectivity.
 The Thumbsticks are Paralax 2-Axis joysticks.
+
+See the [Google Doc]() for wiring.
 
 ##Controller protocol
 
@@ -32,7 +36,7 @@ The final 2 bytes are the button states.
 Each bit represents a button.
 The button schema is based off the SNES controller.
 This means that the 4 primary buttons on the right side of the controller are ABXY.
-Google the SNES controller to see its button schema.
+[Google the SNES controller to see its button schema](https://www.google.com/search?q=snes+controller).
 
 From MSB to LSB:
 
