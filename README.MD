@@ -1,14 +1,15 @@
+#DUALSHOCK3 Clone
 This is a controller inspired by the Sony's DualShock 3.
 It has Twin Thumb Sticks, an accelerometer, buttons, and is wireless.
 This project uses a bluetooth module for wireless conectivity.
 
-"main.c" contains the code for the controller itself.
-"accelerometer.h" is a driver that I created for the Adafruit LIS3DH.
-It assumes 4-wire SPI connection.
+##Hardware
 
 The accelerometer used is the AdaFruit LIS3DH.
 I used HC-05 bluetooth modules for connectivity.
 The Thumbsticks are Paralax 2-Axis joysticks.
+
+##Controller protocol
 
 The controller has a simple request-get USART protocol for retreiving the controller state.
 The protocol begins by sending the controller a null byte.
@@ -44,21 +45,21 @@ The controller will continue to vibrate until a null byte is sent.
 
 The USART baud rate is set to 38400.
 
-File Descriptions:
+##File Descriptions
 
-A2D.h:
+###A2D.h:
 This is a driver for the ADC.
 
-bit.h:
+###bit.h:
 This has binary manipulation helper functions.
 
-accelerometer.h:
+###accelerometer.h:
 Driver written by me for the Adafruit LIS3DH.
 It uses Software SPI to communicate.
 There are read functions in there that have not been tested.
 Use them at your own peril.
 
-usart_ATmega1284.h:
+###usart_ATmega1284.h:
 This has USART functions for the ATMEGA 1284.
 
 I will update this README when I have a video demonstration.
