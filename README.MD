@@ -3,7 +3,9 @@ This is a controller inspired by the Sony's DualShock 3.
 It has Twin Thumb Sticks, an accelerometer, buttons, and is wireless.
 This project uses a bluetooth module for wireless connectivity.
 
-[Here is a video demonstration]().
+See the [Google Doc](https://drive.google.com/open?id=0B5K5OUHJGcLmLTlsRlRZWVctNUk) for more details.
+
+[Video Demonstration]().
 
 ##Hardware
 
@@ -11,7 +13,7 @@ The accelerometer used is the AdaFruit LIS3DH.
 I used HC-05 bluetooth modules for connectivity.
 The Thumbsticks are Paralax 2-Axis joysticks.
 
-See the [Google Doc]() for wiring.
+See the [Google Doc](https://drive.google.com/open?id=0B5K5OUHJGcLmLTlsRlRZWVctNUk) for wiring.
 
 ##Controller protocol
 
