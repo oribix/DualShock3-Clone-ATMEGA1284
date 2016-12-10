@@ -26,7 +26,10 @@ Each value is 1 byte and in 2's compliment.
 The next 3 bytes represent the Thumb sticks state.
 From MSB to LSB:
 
-Left Vertical Axis, Left Horizontal Axis, Right Vertical Axis, Right Horizontal Axis
+- Left Vertical Axis
+- Left Horizontal Axis
+- Right Vertical Axis
+- Right Horizontal Axis
 
 Each Axis is a 6 bits and unsigned.
 This means that an axis is represented on a scale of 0-63
@@ -65,5 +68,3 @@ Use them at your own peril.
 
 ###usart_ATmega1284.h:
 This has USART functions for the ATMEGA 1284.
-
-I will update this README when I have a video demonstration.
