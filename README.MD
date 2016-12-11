@@ -5,7 +5,7 @@ This project uses a bluetooth module for wireless connectivity.
 
 See the [Google Doc](https://drive.google.com/open?id=0B5K5OUHJGcLmLTlsRlRZWVctNUk) for more details.
 
-[Video Demonstration]()
+[Video Demonstration](https://www.youtube.com/watch?v=FelWu7re3BA)
 
 ##Hardware
 
