@@ -65,7 +65,7 @@ This has binary manipulation helper functions.
 ###accelerometer.h:
 Driver written by me for the Adafruit LIS3DH.
 It uses Software SPI to communicate.
-There are read functions in there that have not been tested.
+There are write functions in there that have not been tested.
 Use them at your own peril.
 
 ###usart_ATmega1284.h:
